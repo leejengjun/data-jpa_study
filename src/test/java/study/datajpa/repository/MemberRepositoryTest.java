@@ -4,6 +4,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 import study.datajpa.dto.MemberDto;
@@ -149,5 +153,71 @@ class MemberRepositoryTest {
             System.out.println("member = " + member);
         }
     }
+
+    @Test
+    public void returnType() {
+        Member m1 = new Member("AAA", 10);
+        Member m2 = new Member("BBB", 20);
+        memberRepository.save(m1);
+        memberRepository.save(m2);
+
+//        List<Member> aaa = memberRepository.findListByUsername("AAA");  //컬렉션
+
+//        Member findMember = memberRepository.findMemberByUsername("AAA"); //단건
+//        System.out.println("findMember = " + findMember);
+
+//        Optional<Member> aaa = memberRepository.findOptionalByUsername("AAA"); //단건 Optional
+//        System.out.println("findMember = " + aaa.get());
+
+//        List<Member> result = memberRepository.findListByUsername("asdgfqw");
+//        System.out.println("result = " + result.size()); //result = 0 빈 컬렉션 반환
+
+//        Member findMember = memberRepository.findMemberByUsername("asfasd"); //단건
+//        System.out.println("findMember = " + findMember); //findMember = null 널값 반환.
+
+        Optional<Member> findMember = memberRepository.findOptionalByUsername("asdgqwe"); //단건 Optional
+        System.out.println("findMember = " + findMember);   //findMember = Optional.empty
+        //결과가 2건 이상: javax.persistence.NonUniqueResultException 예외 발생
+
+    }
+
+    @Test
+    public void paging() {
+        //given
+        memberRepository.save(new Member("member1", 10));
+        memberRepository.save(new Member("member2", 10));
+        memberRepository.save(new Member("member3", 10));
+        memberRepository.save(new Member("member4", 10));
+        memberRepository.save(new Member("member5", 10));
+
+        int age = 10;
+        PageRequest pageRequest = PageRequest.of(0, 3, Sort.by(Sort.Direction.DESC, "username"));
+
+        //when
+        Page<Member> page = memberRepository.findByAge(age, pageRequest);
+//        Slice<Member> page = memberRepository.findByAge(age, pageRequest);
+        // Slice (count X) 추가로 limit + 1을 조회한다. 그래서 다음 페이지 여부 확인(최근 모바일 리스트 생각해보면 됨)
+
+        Page<MemberDto> toMap = page.map(m -> new MemberDto(m.getId(), m.getUsername(), null));
+        // 엔티티를 외부에 노출 시키지 않고 map()을 활용하여 DTO에 담아주는 방법
+
+        //then
+        List<Member> content = page.getContent(); // 조회된 데이터
+        long totalElements = page.getTotalElements();
+
+//        for (Member member : content) {
+//            System.out.println("member = " + member);
+//        }
+//        System.out.println("totalElements = " + totalElements);
+
+        assertThat(content.size()).isEqualTo(3); //조회된 데이터 수
+        assertThat(page.getTotalElements()).isEqualTo(5); //전체 데이터 수
+        assertThat(page.getNumber()).isEqualTo(0); //페이지 번호를 가져옴!
+        assertThat(page.getTotalPages()).isEqualTo(2); //전체 페이지 번호
+        assertThat(page.isFirst()).isTrue(); //첫번째 항목인가?
+        assertThat(page.hasNext()).isTrue(); //다음 페이지가 있는가?
+
+    }
+
 
 }
