@@ -8,6 +8,10 @@ import javax.persistence.*;
 @Getter @Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)  // 파라미터가 없는 기본 생성자를 생성해줌(access는 protected)
 @ToString(of = {"id", "username", "age"})   // toString() 메소드를 자동으로 생성!(단,! 연관관계 있는 필드는 넣어주지 않는 것이 좋다! 무한루프에 빠질 수 있음!)
+@NamedQuery(
+        name = "Member.findByUsername",
+        query = "select m from Member m where m.username = :username"
+)
 public class Member {
 
     @Id @GeneratedValue
@@ -22,6 +26,11 @@ public class Member {
 
     public Member(String username) {
         this.username = username;
+    }
+
+    public Member(String username, int age) {
+        this.username = username;
+        this.age = age;
     }
 
     public Member(String username, int age, Team team) {
