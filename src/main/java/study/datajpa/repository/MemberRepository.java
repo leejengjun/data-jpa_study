@@ -3,12 +3,13 @@ package study.datajpa.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 import study.datajpa.dto.MemberDto;
 import study.datajpa.entity.Member;
 
+import javax.persistence.LockModeType;
+import javax.persistence.QueryHint;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -59,5 +60,39 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             countQuery = "select count(m.username) from Member m")  //countQuery를 분리할 수도 있다. 전체 데이터 개수 조회에서 성능 이슈가 있을 경우에!
     Page<Member> findByAge(int age, Pageable pageable);
 //    Slice<Member> findByAge(int age, Pageable pageable);
+
+    /**
+     * @Modifying 에 대해서
+     * @Query Annotation으로 작성 된 변경, 삭제 쿼리 메서드를 사용할 때 필요
+     * 데이터에 변경이 일어나는 INSERT, UPDATE, DELETE, DDL 에서 사용, 주로 '벌크 연산 시'에 사용
+     * @Modifying(clearAutomatically = true) -> 영속성 컨텍스트를 초기화 해주는 어노미테이션 옵션
+     */
+    @Modifying 
+    @Query("update Member m set m.age = m.age + 1 where m.age >= :age")
+    int bulkAgePlus(@Param("age") int age);
+
+    @Query("select m from Member m left join fetch m.team")
+    List<Member> findMemberFetchJoin();
+
+    @Override
+    @EntityGraph(attributePaths = {"team"}) // 연관된 엔티티들을 SQL 한번에 조회하는 방법 페치 조인 JPQL 없이!!
+    List<Member> findAll();
+
+    @EntityGraph(attributePaths = {"team"})
+    @Query("select m from Member m")
+    List<Member> findMemberEntityGraph();
+
+//    @EntityGraph(attributePaths = ("team"))
+//    List<Member> findEntityGraphByUsername(@Param("username") String username);
+
+    @EntityGraph(attributePaths = {"team"})
+//    @EntityGraph("Member.all") // 네임드 쿼리에 엔티티그래프 적용하기
+    List<Member> findEntityGraphByUsername(@Param("username") String username);
+
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly", value = "true")) //변경감지 체크를 안 함
+    Member findReadOnlyByUsername(String username);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Member> findLockByUsername(String username);
 
 }
