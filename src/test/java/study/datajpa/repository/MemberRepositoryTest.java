@@ -313,6 +313,14 @@ class MemberRepositoryTest {
 
     }
 
+    @Test
+    public void callCustom() {
+        List<Member> result = memberRepository.findMemberCustom();
+    }
 
+    @Test
+    public void callCustom_2() {
+        List<Member> result = memberRepository.findMemberCustom_2();
+    }
 
 }

@@ -13,6 +13,7 @@ import javax.persistence.*;
         query = "select m from Member m where m.username = :username"
 )
 @NamedEntityGraph(name = "Member.all", attributeNodes = @NamedAttributeNode("team"))
+// public class Member extends BaseEntity { Auditing 관련 Member 클래스 부분
 public class Member {
 
     @Id @GeneratedValue
