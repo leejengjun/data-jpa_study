@@ -2,12 +2,15 @@ package study.datajpa.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 import study.datajpa.dto.MemberDto;
+import study.datajpa.dto.PageCustom;
+import study.datajpa.dto.PageableCustom;
 import study.datajpa.entity.Member;
 import study.datajpa.repository.MemberRepository;
 
@@ -55,7 +58,13 @@ public class MemberController {
                 .map(MemberDto::new); //람다로 길이를 줄임.
     }
 
-    @PostConstruct
+    @GetMapping("/memberscustom")
+    public PageCustom<MemberDto> listCustom(Pageable pageable) {
+        Page<MemberDto> map = memberRepository.findAll(pageable).map(MemberDto::new);
+        return new PageCustom<MemberDto>(map.getContent(), map.getPageable(), map.getTotalElements());
+    }
+
+//    @PostConstruct
     public void init() {
 //        memberRepository.save(new Member("userA"));
         for (int i = 0; i < 100; i++) { // 스프링 데이터 페이징 정렬기능 실습을 위한 테스트 데이터 넣기

@@ -1,26 +1,28 @@
 package study.datajpa.dto;
 
 import lombok.Getter;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.SliceImpl;
 
 import java.io.Serializable;
 import java.util.List;
 
 @Getter
 public class PageCustom<T> implements Serializable {
+
     private List<T> content;
 
-    private boolean hasNext;
+    private PageableCustom pageableCustom;
 
-    private int totalPages;
+    public PageCustom(List<T> content, Pageable pageable, long total) {
+        this.content = content;
+        this.pageableCustom = new PageableCustom(new PageImpl(content, pageable, total));
+    }
 
-    private long totalElements;
-
-    private int page;
-
-    private int size;
-
-    private boolean first;
-
-    private boolean last;
+    public PageCustom(List<T> content, Pageable pageable, boolean hasNext) {
+        this.content = content;
+        this.pageableCustom = new PageableCustom(new SliceImpl(content, pageable, hasNext));
+    }
 
 }
