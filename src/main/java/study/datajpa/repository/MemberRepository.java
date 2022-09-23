@@ -22,17 +22,50 @@ public interface MemberRepository extends JpaRepository<Member, Long>, MemberRep
      *     이렇게 애플리케이션 로딩 시점에 오류를 인지할 수 있는 것이 스프링 데이터 JPA의 매우 큰 장점이다.
      *     자칫하면 메소드 명이 길어질 수 있다.
      *     기능이 간단할 때 사용하면 좋다!
+     *     JpaRepository 인터페이스: 공통 CRUD 제공
+     *     제네릭은 <엔티티 타입, 식별자 타입> 설정
+     *
+     *      주요 메서드
+     *     save(S) : 새로운 엔티티는 저장하고 이미 있는 엔티티는 병합한다.
+     *     delete(T) : 엔티티 하나를 삭제한다. 내부에서 EntityManager.remove() 호출
+     *     findById(ID) : 엔티티 하나를 조회한다. 내부에서 EntityManager.find() 호출
+     *     getOne(ID) : 엔티티를 프록시로 조회한다. 내부에서 EntityManager.getReference() 호출
+     *     findAll(…) : 모든 엔티티를 조회한다. 정렬( Sort )이나 페이징( Pageable ) 조건을 파라미터로 제공할 수 있다.
      */
+    
+    // 메소드 이름으로 쿼리 생성 findByUsernameAndAgeGreaterThan
     List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
 
 
     List<Member> findTop3HelloBy();
 
+    /**
+     * 쿼리 메소드 기능
+     * 메소드 이름으로 쿼리 생성
+     * NamedQuery
+     * @Query - 리파지토리 메소드에 쿼리 정의
+     * 파라미터 바인딩
+     * 반환 타입
+     * 페이징과 정렬
+     * 벌크성 수정 쿼리
+     * @EntityGraph
+     */
+
+    /**
+     * 쿼리 메소드 기능 3가지
+     *
+     * 메소드 이름으로 쿼리 생성
+     * 메소드 이름으로 JPA NamedQuery 호출
+     * @Query 어노테이션을 사용해서 리파지토리 인터페이스에 쿼리 직접 정의
+     */
+
 //    @Query(name = "Member.findByUsername") //없애도 잘 실행 된다! 관례상 네임드쿼리를 먼저 확인하고 다음으로는 메소드를 확인함!
     List<Member> findByUsername(@Param("username") String username);
-    // 네임드 쿼리는 실무에서는 거의 사용하지 않는다!
-    // *** 단! 네임드 쿼리의 가장큰 장점은 애플리케이션 로딩 시점에 파싱을 해서 오류가 있으면 그 문법 오류를 알려준다! ***
-    // 네임드 쿼리의 장점을 가지는 리포지토리 메소드에 쿼리 정의하는 방법이 막강함!
+    /**
+     * 네임드 쿼리는 실무에서는 거의 사용하지 않는다!
+     * *** 단! 네임드 쿼리의 가장큰 장점은 애플리케이션 로딩 시점에 파싱을 해서 오류가 있으면 그 문법 오류를 알려준다! ***
+     * 네임드 쿼리의 장점을 가지는 '리포지토리 메소드에 쿼리 정의하는 방법'이 막강함!
+     */
 
     /**
      *  리포지토리 메소드에 쿼리 정의
